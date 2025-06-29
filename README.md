@@ -1,16 +1,25 @@
-## Hi there 👋
+# 🎥 tvBeautifully
 
-<!--
-**tvBeautifully/tvBeautifully** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+**tvBeautifully** is a modern and elegant video streaming platform built for a seamless and aesthetic viewing experience. Designed with love, performance, and simplicity in mind.
 
-Here are some ideas to get you started:
+> “Where beauty meets the screen.”
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+---
+
+## 🌟 Features
+
+- 🖥️ Beautiful, minimal and responsive UI
+- 🔍 Smart search functionality
+- 📥 Watch & Download trending videos
+- ⚡ Fast loading and optimized performance
+- 🔒 Ad protection with controlled UI
+
+---
+
+## 🚀 Live Preview
+
+🔗 [Visit tvBeautifully](https://tvbeautifully.github.io)
+
+---
+
+## 📂 Project Structure
