@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#121212" />
+  <meta name="description" content="Watch and download videos on Beautifully Tv. Smooth UI, responsive design, and powerful video search." />
+  <meta name="keywords" content="Beautifully Tv, video player, video streaming, download videos, video app" />
+  <meta name="robots" content="index, follow" />
+  <meta property="og:title" content="Beautifully Tv" />
+  <meta property="og:description" content="Watch and download trending videos with smooth UI." />
+  <meta property="og:image" content="https://raw.githubusercontent.com/PickleTv-com/PickleTv-Videos/main/banner-4887650.jpg" />
+  <meta property="og:url" content="https://tv.beautifully.com/" />
+  <link rel="canonical" href="https://tv.beautifully.com/" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="/assets/favicon.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>Beautifully Tv</title>
+</head>
+<body>
+  <script>document.addEventListener("contextmenu", e => e.preventDefault());</script>
+
+  <header>
+    <h1 tabindex="0" role="button" onclick="location.href='https://t.me/Target_Box'" onkeydown="if(event.key==='Enter') location.href='https://t.me/Target_Box'">Beautifully Tv</h1>
+    <label for="search" class="visually-hidden">Search Videos</label>
+    <input type="text" id="search" placeholder="Search Videos..." aria-label="Search Videos" />
+  </header>
+
+  <main role="main">
+    <section id="video-list" aria-live="assertive">
+      <div class="loading"><div class="spinner"></div></div>
+    </section>
+  </main>
+
+  <footer>
+    &copy; 2025 Beautifully Tv. All rights reserved. | <a href="https://t.me/Target_Box">Privacy</a> | <a href="https://t.me/Target_Box">Terms</a>
+  </footer>
+
+  <div id="video-ad-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:9999;justify-content:center;align-items:center;">
+    <video id="video-ad" style="width:100%;height:100%;object-fit:cover;" controls autoplay></video>
+  </div>
+
+  <script src="scripts.js" defer></script>
+</body>
+</html>
