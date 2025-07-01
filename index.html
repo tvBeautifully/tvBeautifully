@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -14,25 +15,35 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="/assets/favicon.png" />
-  <link rel="preload" href="https://yourcdn.com/banner.jpg" as="image">
-  <link rel="stylesheet" href="style.css">
+  <link rel="preload" href="https://yourcdn.com/banner.jpg" as="image" />
+  <link rel="stylesheet" href="style.css" />
   <title>Beautiful TV</title>
 </head>
 <body>
   <header>
-    <h1><a href="/" style="text-decoration:none; color:inherit;" aria-label="Home">Beautiful TV</a></h1>
-    <input type="text" id="search" placeholder="Search Videos..." aria-label="Search Videos">
-  </header>  <main>
+    <h1><a href="/" aria-label="Home" style="text-decoration:none; color:inherit;">Beautiful TV</a></h1>
+    <input type="text" id="search" placeholder="Search Videos..." aria-label="Search Videos" />
+  </header>
+
+  <main>
     <section id="video-list">
       <div class="loading"><div class="spinner"></div></div>
     </section>
-  </main>  <footer role="contentinfo">
+  </main>
+
+  <footer role="contentinfo">
     &copy; 2025 Beautiful TV. All rights reserved.
-  </footer>  <!-- Video Ad Overlay -->  <div id="video-ad-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:9999;justify-content:center;align-items:center;flex-direction:column;">
-    <video id="video-ad" autoplay muted style="width:100%;height:100%;object-fit:cover;cursor:pointer;" aria-label="Ad Video"></video>
+  </footer>
+
+  <!-- Video Ad Overlay -->
+  <div id="video-ad-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:9999;justify-content:center;align-items:center;flex-direction:column;">
+    <video id="video-ad" controls autoplay muted style="width:100%;height:100%;object-fit:cover;cursor:pointer;" aria-label="Ad Video"></video>
     <button id="skip-ad-btn" style="position:absolute;top:10px;right:60px;display:none;z-index:10000;background:#fff;padding:8px 12px;border:none;border-radius:4px;cursor:pointer;">Skip Ad</button>
-    <button id="close-ad-btn" style="position:absolute;top:10px;right:10px;z-index:10000;background:#fff;padding:8px 12px;border:none;border-radius:4px;cursor:pointer;">\u2716</button>
-  </div>  <script>
+    <button id="close-ad-btn" style="position:absolute;top:10px;right:10px;z-index:10000;background:#fff;padding:8px 12px;border:none;border-radius:4px;cursor:pointer;">✖</button>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
     const CHUNK_SIZE = 30;
     let allVideos = [], displayedVideos = [], currentIndex = 0;
     let debounceTimer, isLoading = false, isSearchMode = false;
@@ -44,34 +55,40 @@
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(searchVideos, 300);
       });
-
-      document.getElementById("close-ad-btn").addEventListener("click", () => {
-        document.getElementById("video-ad").pause();
-        document.getElementById("video-ad-overlay").style.display = "none";
-      });
-
+      document.getElementById("close-ad-btn").addEventListener("click", closeAdOverlay);
+      document.getElementById("skip-ad-btn").addEventListener("click", skipAd);
       document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") {
-          document.getElementById("video-ad").pause();
-          document.getElementById("video-ad-overlay").style.display = "none";
-        }
+        if (e.key === "Escape") closeAdOverlay();
       });
     });
+
+    function closeAdOverlay() {
+      const adVideo = document.getElementById("video-ad");
+      adVideo.pause();
+      adVideo.src = "";
+      document.getElementById("video-ad-overlay").style.display = "none";
+    }
+
+    function skipAd() {
+      const adVideo = document.getElementById("video-ad");
+      const downloadUrl = adVideo.dataset.downloadUrl;
+      closeAdOverlay();
+      if (downloadUrl) directDownload(downloadUrl);
+    }
 
     async function fetchVideos() {
       try {
         const res = await fetch("https://raw.githubusercontent.com/tvBeautifully/assets/refs/heads/main/BeautifulVideos.json");
         const data = await res.json();
         allVideos = data.videos || [];
+        loadNextVideos();
       } catch (error) {
-        allVideos = [];
         document.getElementById("video-list").innerHTML = "<p style='text-align:center;color:red;'>Failed to load videos.</p>";
       }
-      loadNextVideos();
     }
 
     function loadNextVideos() {
-      if (isLoading || currentIndex >= allVideos.length) return;
+      if (isLoading || currentIndex >= allVideos.length || isSearchMode) return;
       isLoading = true;
       const nextChunk = allVideos.slice(currentIndex, currentIndex + CHUNK_SIZE);
       displayedVideos = displayedVideos.concat(nextChunk);
@@ -89,6 +106,8 @@
         container.innerHTML = "<p style='text-align:center;color:#aaa;'>No videos found.</p>";
         return;
       }
+
+      const liked = JSON.parse(localStorage.getItem("likedVideos") || "[]");
 
       videos.forEach(video => {
         if (!video || !video.url) return;
@@ -125,6 +144,7 @@
         likeBtn.textContent = "Like";
         likeBtn.setAttribute("aria-label", "Like this video");
         likeBtn.onclick = () => likeVideo(video.id, likeBtn);
+        if (liked.includes(video.id)) likeBtn.classList.add("liked");
 
         const downloadBtn = document.createElement("button");
         downloadBtn.className = "btn";
@@ -139,7 +159,7 @@
         const visitBtn = document.createElement("button");
         visitBtn.className = "btn";
         visitBtn.textContent = "Visit";
-        visitBtn.setAttribute("aria-label", "Visit link");
+        visitBtn.setAttribute("aria-label", "Visit affiliate link");
         visitBtn.onclick = () => window.open(video.visitUrl || "https://affiliate-link.com", "_blank", "noopener,noreferrer");
 
         thumb.appendChild(img);
@@ -147,8 +167,7 @@
         btnGroup.append(likeBtn, downloadBtn, visitBtn);
         info.appendChild(btnGroup);
 
-        card.appendChild(thumb);
-        card.appendChild(info);
+        card.append(thumb, info);
         container.appendChild(card);
       });
     }
@@ -156,7 +175,6 @@
     function likeVideo(id, btn) {
       const liked = JSON.parse(localStorage.getItem("likedVideos") || "[]");
       const index = liked.indexOf(id);
-
       if (index !== -1) {
         liked.splice(index, 1);
         btn.classList.remove("liked");
@@ -172,36 +190,32 @@
       const adVideo = document.getElementById("video-ad");
 
       if (!downloadUrl) return alert("Download link is missing.");
-
-      if (!adUrl) {
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = '';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        return;
-      }
+      if (!adUrl) return directDownload(downloadUrl);
 
       overlay.style.display = "flex";
       adVideo.src = adUrl;
+      adVideo.dataset.downloadUrl = downloadUrl;
+      document.getElementById("skip-ad-btn").style.display = "block";
       adVideo.play();
 
       adVideo.onended = () => {
-        overlay.style.display = "none";
-        adVideo.src = "";
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = '';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        closeAdOverlay();
+        directDownload(downloadUrl);
       };
 
       adVideo.onerror = () => {
-        overlay.style.display = "none";
+        closeAdOverlay();
         alert("Ad failed to load. Please try again.");
       };
+    }
+
+    function directDownload(url) {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = '';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     }
 
     function handleScroll() {
@@ -221,6 +235,7 @@
         displayedVideos = [];
         currentIndex = 0;
         isSearchMode = false;
+        container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
         loadNextVideos();
         return;
       }
@@ -235,5 +250,6 @@
       currentIndex = filtered.length;
       renderVideos(displayedVideos);
     }
-  </script></body>
+  </script>
+</body>
 </html>
