@@ -18,7 +18,7 @@
 
 ## 🚀 Live Preview
 
-🔗 [Visit tvBeautifully](https://tvbeautifully.github.io)
+🔗 [Visit tvBeautifully](https://tvbeautifully.github.io/tvBeautifully/)
 
 ---
 
