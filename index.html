@@ -129,7 +129,7 @@
 
     async function fetchVideos() {
       try {
-        const res = await fetch("https://raw.githubusercontent.com/tvBeautifully/assets/refs/heads/main/BeautifulVideos.json");
+        const res = await fetch("https://raw.githubusercontent.com/tvBeautifully/assets/refs/heads/main/videos.json");
         const data = await res.json();
         allVideos = data.videos || [];
         loadNextVideos();
@@ -329,4 +329,4 @@
     }
   </script>
 </body>
-      </html>
+    </html>
