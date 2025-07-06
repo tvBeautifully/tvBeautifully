@@ -8,20 +8,45 @@
   <meta name="keywords" content="Beautiful TV, video player, streaming, download, affiliate, earn money" />
   <meta name="robots" content="index, follow" />
   <meta name="author" content="Beautiful TV Team" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
   <meta property="og:title" content="Beautiful TV" />
   <meta property="og:description" content="Watch trending videos and earn from links." />
   <meta property="og:image" content="https://yourcdn.com/banner.jpg" />
   <meta property="og:url" content="https://yourdomain.com/" />
   <meta name="twitter:card" content="summary_large_image" />
-  
+
   <link rel="canonical" href="https://yourdomain.com/" />
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="/assets/favicon.png" />
   <link rel="preload" href="https://yourcdn.com/banner.jpg" as="image" />
+  <link rel="preconnect" href="https://yourcdn.com" crossorigin />
+  <link rel="dns-prefetch" href="https://yourcdn.com" />
   <link rel="stylesheet" href="style.css" />
-  
+
   <title>Beautiful TV</title>
+
+  <style>
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #222;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      opacity: 0;
+      z-index: 99999;
+      transition: opacity 0.4s;
+    }
+    .toast.show {
+      opacity: 1;
+    }
+  </style>
 </head>
 <body>
   <noscript>
@@ -43,7 +68,6 @@
     &copy; 2025 Beautiful TV. All rights reserved.
   </footer>
 
-  <!-- Ad Overlay -->
   <div id="video-ad-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:9999;justify-content:center;align-items:center;flex-direction:column;">
     <video id="video-ad" controls autoplay muted style="width:100%;height:100%;object-fit:cover;cursor:pointer;" aria-label="Ad Video"></video>
     <button id="skip-ad-btn" style="position:absolute;top:10px;right:60px;display:none;z-index:10000;background:#fff;padding:8px 12px;border:none;border-radius:4px;cursor:pointer;">Skip Ad</button>
@@ -75,6 +99,18 @@
       } catch {
         return [];
       }
+    }
+
+    function showToast(message = "Done", duration = 2000) {
+      const toast = document.createElement("div");
+      toast.className = "toast";
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.classList.add("show"), 10);
+      setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => document.body.removeChild(toast), 300);
+      }, duration);
     }
 
     function closeAdOverlay() {
@@ -158,6 +194,7 @@
         likeBtn.className = "btn";
         likeBtn.textContent = "Like";
         likeBtn.setAttribute("aria-label", "Like this video");
+        likeBtn.setAttribute("aria-pressed", liked.includes(video.id));
         likeBtn.onclick = () => likeVideo(video.id, likeBtn);
         if (liked.includes(video.id)) likeBtn.classList.add("liked");
 
@@ -194,21 +231,27 @@
     function likeVideo(id, btn) {
       let liked = getLikedVideos();
       const index = liked.indexOf(id);
-      if (index !== -1) {
-        liked.splice(index, 1);
-        btn.classList.remove("liked");
-      } else {
+      const isLiked = index === -1;
+
+      if (isLiked) {
         liked.push(id);
         btn.classList.add("liked");
+        showToast("Video liked");
+      } else {
+        liked.splice(index, 1);
+        btn.classList.remove("liked");
+        showToast("Like removed");
       }
+
       localStorage.setItem("likedVideos", JSON.stringify(liked));
+      btn.setAttribute("aria-pressed", isLiked);
     }
 
     function playAdThenDownload(adUrl, downloadUrl) {
       const overlay = document.getElementById("video-ad-overlay");
       const adVideo = document.getElementById("video-ad");
 
-      if (!downloadUrl) return alert("Download link is missing.");
+      if (!downloadUrl) return showToast("Download link is missing");
       if (!adUrl) return directDownload(downloadUrl);
 
       overlay.style.display = "flex";
@@ -224,17 +267,21 @@
 
       adVideo.onerror = () => {
         closeAdOverlay();
-        alert("Ad failed to load. Please try again.");
+        showToast("Ad failed to load");
       };
     }
 
     function directDownload(url) {
+      if (!url) return showToast("No download link");
       const a = document.createElement('a');
       a.href = url;
       a.setAttribute('download', '');
+      a.setAttribute('rel', 'noopener noreferrer');
+      a.setAttribute('target', '_blank');
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+      showToast("Download started");
     }
 
     function handleScroll() {
@@ -271,11 +318,14 @@
       renderVideos(displayedVideos);
     }
   </script>
-   <script>
+
+  <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/serviceWorker.js')
-        .then(() => console.log('Service Worker registered'))
-        .catch(err => console.error('Service Worker failed:', err));
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/serviceWorker.js')
+          .then(reg => console.log('Service Worker registered with scope:', reg.scope))
+          .catch(err => console.error('Service Worker failed:', err));
+      });
     }
   </script>
 </body>
